@@ -47,7 +47,10 @@ type shareService struct {
 	coordinator     *Coordinator
 }
 
-func (s *shareService) SearchShare(ctx context.Context, accountType string, email string, uniqueName string) ([]*model.Share, error) {
+func (s *shareService) SearchShare(context.Context, string, string, string) (
+	[]*model.Share,
+	error,
+) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -155,7 +158,7 @@ func (s *shareService) GetClaudeOauthLoginUrl(ctx context.Context, share *model.
 	return url, nil
 }
 
-func (s *shareService) GetShareTokenByAccessToken(ctx context.Context, accessToken string, share *model.Share, resetLimit bool) (string, error) {
+func (s *shareService) GetShareTokenByAccessToken(_ context.Context, accessToken string, share *model.Share, resetLimit bool) (string, error) {
 	chatDomain := fmt.Sprintf("%s/token/register", s.viper.GetString("pandora.domain.chat"))
 	var resp struct {
 		TokenKey string `json:"token_key"`
@@ -181,7 +184,8 @@ func (s *shareService) GetShareTokenByAccessToken(ctx context.Context, accessTok
 		SetResult(&resp).
 		Post(chatDomain)
 	// 如果code不为200，返回body中的错误信息
-	if oresp.StatusCode() != 200 {
+	switch {
+	case oresp.StatusCode() != 200:
 		s.logger.Error("RefreshShareToken error", zap.Any("err", oresp))
 		return "", fmt.Errorf(oresp.String())
 	}
